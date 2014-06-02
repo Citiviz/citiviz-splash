@@ -31,18 +31,24 @@ logo.sprite.SetPosition(
     -1000
 );
 
+opacity.min = 0.3;
+opacity.angle = 0.0;
+opacity.value = 0.0;
+
 fun refresh_callback ()
   {
     if (status == "normal")
       {
-        logo.opacity_angle += ((2 * 3.14) / 50) * 0.5;  # 0.5 HZ
-        min_opacity = 0.3;
-        opacity = (Math.Cos(logo.opacity_angle) + 1) / 2;
-        opacity *= 1 - min_opacity;
-        opacity += min_opacity;
-        logo.sprite.SetX (Window.GetX() + Window.GetWidth()  / 2 - logo.image.GetWidth()  / 2);
-        logo.sprite.SetY (Window.GetY() + Window.GetHeight() / 2 - logo.image.GetHeight() / 2);
-        logo.sprite.SetOpacity (opacity);
+        opacity.angle += ((2 * 3.14) / 50) * 0.5;  # 0.5 HZ
+	opacity.value = (Math.Cos(opacity.angle) + 1) / 2;
+	opacity.value *= 1 - opacity.min;
+	opacity.value += opacity.min;
+	logo.sprite.SetPosition (
+		window.x + ((window.width / 2) - (logo.image.GetWidth() / 2)),
+		window.y + ((window.height / 2) - (logo.image.GetHeight() / 2)),
+		-1000
+	);
+        logo.sprite.SetOpacity(opacity.value);
       }
     else
       {
