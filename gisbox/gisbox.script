@@ -1,15 +1,35 @@
-# This is an example plymouth plugin script
+window.height 	= Window.GetHeight();
+window.width   	= Window.GetWidth();
+window.x 	= Window.GetX();
+window.y	= Window.GetY();
 
+# background
+Window.SetBackgroundTopColor(0.0, 0.0, 0.0);
+Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
 
-# GISBox customization, add our wallpaper
-gisbox_wall = Image("wallpaper.png").Scale(
-    Window.GetWidth(), Window.GetHeight());
-gisbox_sprite = Sprite(gisbox_wall);
-gisbox_sprite.setZ(-100);
+fun scale_keep_ratio(source, target_width, target_height) {
+    source_width = source.GetWidth();
+    source_height = source.GetHeight();
 
-logo.image = Image("logo.png");
+    target_ratio = target_height / target_width;
+    source_ratio = source_height / source_width;
+
+    if (source_ratio < target_ratio) {
+        scale_factor = target_height / source_height;
+    } else {
+        scale_factor = target_width / source_width;
+    }
+    return source.Scale(source_width * scale_factor, source_height * scale_factor);
+}
+
+# logo
+logo.image = scale_keep_ratio(Image("logo.png"), window.width * 0.8, window.height * 0.32);
 logo.sprite = Sprite(logo.image);
-logo.opacity_angle = 0;
+logo.sprite.SetPosition(
+    window.x + ((window.width / 2) - (logo.image.GetWidth() / 2)),
+    window.y + ((window.height / 2) - (logo.image.GetHeight() / 2)),
+    -1000
+);
 
 fun refresh_callback ()
   {
@@ -32,7 +52,7 @@ fun refresh_callback ()
       }
   }
   
-Plymouth.SetRefreshFunction (refresh_callback);
+#Plymouth.SetRefreshFunction (refresh_callback);
 
 #----------------------------------------- Dialogue --------------------------------
 
@@ -117,6 +137,36 @@ fun display_password_callback (prompt, bullets)
 
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+#----------------------------------------- Progress Bar --------------------------------
+
+progress_bar.original_image = Image("progress_bar.png");
+progress_bar.original_image = progress_bar.original_image.Scale(window.width, 8);
+progress_bar.sprite = Sprite();
+
+progress_bar.x = window.x;
+progress_bar.y = window.y + window.height - progress_bar.original_image.GetHeight();
+progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
+
+fun progress_callback (duration, progress)
+  {
+    if (progress_bar.image.GetWidth () != Math.Int (progress_bar.original_image.GetWidth () * progress))
+      {
+        progress_bar.image = progress_bar.original_image.Scale(progress_bar.original_image.GetWidth(progress_bar.original_image) * progress, progress_bar.original_image.GetHeight());
+        progress_bar.sprite.SetImage (progress_bar.image);
+      }
+  }
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+#----------------------------------------- Brand --------------------------------
+
+brand.image = Image("brand.png");
+brand.sprite = Sprite(brand.image);
+brand.sprite.SetPosition(
+	window.x + (window.width - brand.image.GetWidth()),
+	window.y + (window.height - progress_bar.original_image.GetHeight() - brand.image.GetHeight())
+);
 
 #----------------------------------------- Quit --------------------------------
 
